@@ -1,46 +1,90 @@
-window.addEventListener('load', async () => {
-    await main()
+window.addEventListener("load", async () => {
+  await main()
 })
 
 const main = async () => {
-    // put all stuff here
+  // put all stuff here
 
-    const el = document.getElementById("el")
+  //   const res = await fetch("http://localhost:3000/api/timetable")
+  //   const data = await res.json()
+  //   console.dir(data)
 
-    const res = await fetch("http://localhost:3000/api/timetable")
-    const data = await res.json()
-    console.dir(data)
+  //   el.innerHTML = data.map(d => `<li>${d.courseName}</li>`).join(",<br>")
 
-    el.innerHTML = data.map(d => `<li>${d.courseName}</li>`).join(",<br>")
-}
-
-
-const slots = [
-    { name: "slot1", startTime: "", endTime: "" },
-    { name: "slot2", startTime: "", endTime: "" },
-    { name: "slot3", startTime: "", endTime: "" },
-    { name: "slot4", startTime: "", endTime: "" },
-    { name: "slot5", startTime: "", endTime: "" },
-]
-
-const days = ["monday", "tuesday", "wednesday"]
-
-const timetable = {
-    "monday": {
-        "slot1": { courseName: "math" },
-        "slot3": { courseName: "science" }
+  const data = {
+    monday: {
+      "1": "math",
+      "3": "science"
     },
 
+    tuesday: {
+      "2": "english",
+      "5": "history"
+    }
+  }
 
-    "tuesday": {
-        "slot2": { courseName: "math" },
-        "slot5": { courseName: "science" }
-    },
+  const slots = ["1", "2", "3", "4", "5"]
+
+  const days = [
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+    "sunday"
+  ]
+  const el = document.getElementById("el")
+  const renderTable = Table(days, slots, "day/slot")
+  renderTable(el, data)
 }
 
-const renderTimeTable = (timetable, days, slots) => {
+const Table = (vLabels, hLabels, pivot) => {
+  const _arrayToRowItems = items => {
+    const html = `${items.map(item => `<td>${item}</td>`).join("\n")}`
+    return html
+  }
 
-    days.forEach(day => {
+  const _arrayToTableRow = items => {
+    return `<tr>${_arrayToRowItems(items)}</tr>`
+  }
 
-    });
+  const _arrayToTableHead = items => {
+    return `<thead>${_arrayToRowItems(items)}</thead>`
+  }
+
+  const _dataAsRows = (data, vLabels, hLabels) => {
+    const rows = []
+    vLabels.forEach(vLabel => {
+      const row = [vLabel]
+      hLabels.forEach(hLabel => {
+        row.push(
+          data[vLabel] ? (data[vLabel][hLabel] ? data[vLabel][hLabel] : "") : ""
+        )
+      })
+      rows.push(row)
+    })
+    return rows
+  }
+
+  const _dataToHtmlTable = (data, vLabels, hLabels, pivot) => {
+    const dataInRows = _dataAsRows(data, vLabels, hLabels)
+    let tableContentHtml = ""
+    tableContentHtml += _arrayToTableHead([pivot, ...hLabels])
+
+    const rowsHtml = dataInRows.map(row => _arrayToTableRow(row)).join("\n")
+    tableContentHtml += rowsHtml
+    return `<table>${tableContentHtml}</table>`
+  }
+
+  const _renderHtml = (el, html) => {
+    el.innerHTML = html
+    return el
+  }
+
+  const renderTable = (el, data) => {
+    return _renderHtml(el, _dataToHtmlTable(data, vLabels, hLabels, pivot))
+  }
+
+  return renderTable
 }
