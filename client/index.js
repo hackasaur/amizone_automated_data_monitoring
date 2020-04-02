@@ -3,40 +3,34 @@ window.addEventListener("load", async () => {
 })
 
 const main = async () => {
-  // put all stuff here
 
-  //   const res = await fetch("http://localhost:3000/api/timetable")
-  //   const data = await res.json()
-  //   console.dir(data)
+  const res = await fetch("http://localhost:3000/api/timetable")
+  const data = await res.json()
+  console.dir(data)
 
-  //   el.innerHTML = data.map(d => `<li>${d.courseName}</li>`).join(",<br>")
+  const el = document.getElementById("el")
+  const renderTable = Table(data.days, data.slots, "day/slot")
 
-  const data = {
-    monday: {
-      "1": "math",
-      "3": "science"
-    },
+  renderTable(el, sanitize(data.data))
+}
 
-    tuesday: {
-      "2": "english",
-      "5": "history"
+const _arrayToList = (arr) => {
+  return `<ul>${arr.map(item => `<li>${item}</li>`).join("")}</ul>`
+}
+
+const sanitize = (data) => {
+  const clone = {...data}
+  for (const day of Object.keys(data)) {
+    for (const slot of Object.keys(data[day])) {
+      const html = _arrayToList([
+        data[day][slot].courseName, 
+        data[day][slot].teacher, 
+        data[day][slot].attendanceStatus])
+
+      clone[day][slot] = html
     }
   }
-
-  const slots = ["1", "2", "3", "4", "5"]
-
-  const days = [
-    "monday",
-    "tuesday",
-    "wednesday",
-    "thursday",
-    "friday",
-    "saturday",
-    "sunday"
-  ]
-  const el = document.getElementById("el")
-  const renderTable = Table(days, slots, "day/slot")
-  renderTable(el, data)
+  return clone
 }
 
 const Table = (vLabels, hLabels, pivot) => {
